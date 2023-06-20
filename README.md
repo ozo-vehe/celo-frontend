@@ -5,17 +5,17 @@
 - A simple marketplace dapp built on the Celo blockchain. The decentralized marketplace application will allow users to list their items for sale, purchase items, view listed items and lookup products they purchased or uploaded on their profile. It is built on the pre-existing marketplace smart contract with added functionalities and an improved frontend page. The following functionalities were added
 
 1. To the smart contract
-- `supply` property to the `Product` struct
-- `userProducts` mapping to store all the products bought by a user
-- `buyAllProduct()` frunction: It enables users to buy all available supply of a particular product at the specified price
-
+- A `supply` property to the `Product` struct
+- A `userProducts` mapping to store all the products bought by a user.
+- A `buyAllProduct()` function that enables users to buy all available supply of a particular product at the specified price.
 
 2. To the frontend
-- Available supply of a particular product
-- `Profile.tsx` component: to display all the products uploaded and purchased by a user
-- `Buy all` button: to allow users by all the available supply o a particular product
-- `useOwner` hook: to get all the products purchased by a user from the smart contract
-- `useBuyAllProduct` hook: to buy all the available supply of a particular product
+- Display of the available supply of a particular product.
+- A `Profile.tsx` component to display all the products uploaded and purchased by a user.
+- A `buy all` button to allow users by all the available supply of a particular product.
+- A `useOwner` hook to get all the products purchased by a user from the smart contract.
+- A `useBuyAllProduct` hook to buy all the available supply of a particular product.
+
 
 ## Built With
 
