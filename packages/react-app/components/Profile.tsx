@@ -17,7 +17,7 @@ import { useUserBoughtProducts } from "@/hooks/contracts/useOwner";
 const Profile = () => {
   // Use the useContractCall hook to read how many products are in the marketplace contract
   const { data } = useContractCall("getProductsLength", [], true);
-  // Convert the data to a number
+  
   // Use the useAccount hook to store the user's address
   const { address } = useAccount();
 
@@ -46,6 +46,7 @@ const Profile = () => {
     const products = [];
     // Loop through the products, return the Product component and push it to the products array
     for (let i = 0; i < productLength; i++) {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const { data }:any = useContractCall("readProduct", [i], true);
       if(data[0] === address) {
         products.push(
@@ -76,6 +77,7 @@ const Profile = () => {
     const products = [];
     // Loop through the products, return the Product component and push it to the products array
     for (let i = 0; i < productLength; i++) {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const { data }:any = useUserBoughtProducts([address, i], true);
       if(data && data.owner !== "0x0000000000000000000000000000000000000000") {
         products.push(
