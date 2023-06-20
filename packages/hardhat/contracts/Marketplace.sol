@@ -144,7 +144,6 @@ contract Marketplace {
         uint256 totalPrice = products[_index].price * products[_index].supply;
         require(msg.sender != products[_index].owner, "Owner can not buy all his product");
         require(products[_index].supply > 0, "Product sold out");
-        require(msg.value >= totalPrice, "Invalid amount sent");
         require(
             IERC20Token(cUsdTokenAddress).transferFrom(
                 // Sender's address is the buyer
@@ -152,13 +151,15 @@ contract Marketplace {
                 // Receiver's address is the seller
                 products[_index].owner,
                 // Amount of tokens to transfer is the price of the product
-                products[_index].price
+                totalPrice
             ),
             // If transfer fails, throw an error message
             "Transfer failed."
         );
 
+        products[_index].sold = products[_index].supply;
         products[_index].supply -= products[_index].supply;
+        userProducts[msg.sender][_index] = products[_index];
     }
 
     // Returns the number of products in the marketplace
