@@ -2,6 +2,8 @@
 - Demo: [Marketplace](https://celo-frontend-eta.vercel.app/)
 
 ## About The Project
+<img src="https://github.com/ozo-vehe/celo-frontend/blob/master/packages/react-app/celo-frontend.png" alt="Image" width="800px" height="650px">
+
 - A simple marketplace dapp built on the Celo blockchain. The decentralized marketplace application will allow users to list their items for sale, purchase items, view listed items and lookup products they purchased or uploaded on their profile. It is built on the pre-existing marketplace smart contract with added functionalities and an improved frontend page. The following functionalities were added
 
 1. To the smart contract
