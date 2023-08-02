@@ -59,6 +59,7 @@ const Profile = () => {
             loading={loading}
             clear={clear}
             profile={true}
+            uploaded={true}
           />
         );
       }
@@ -90,6 +91,7 @@ const Profile = () => {
             loading={loading}
             clear={clear}
             profile={true}
+            uploaded={false}
           />
         );
       }

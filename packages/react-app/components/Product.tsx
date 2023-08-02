@@ -19,6 +19,7 @@ import { useContractApprove } from "@/hooks/contracts/useApprove";
 import { useContractCall } from "@/hooks/contracts/useContractRead";
 import { useContractSend } from "@/hooks/contracts/useContractWrite";
 import { useBuyAll } from "@/hooks/contracts/useBuyAllProducts";
+import { useNumOfBoughtProducts } from "@/hooks/contracts/useNumOfProducts";
 
 // Define the interface for the product, an interface is a type that describes the properties of an object
 interface Product {
@@ -30,14 +31,17 @@ interface Product {
   location: string;
   sold: boolean;
   supply: number;
+  numberOfProduct: number;
 }
 
 // Define the Product component which takes in the id of the product and some functions to display notifications
-const Product = ({profile, id, setError, setLoading, clear }: any) => {
+const Product = ({profile, id, setError, setLoading, clear, uploaded }: any) => {
   // Use the useAccount hook to store the user's address
   const { address } = useAccount();
   // Use the useContractCall hook to read the data of the product with the id passed in, from the marketplace contract
   const { data: rawProduct }: any = useContractCall("readProduct", [id], true);
+  // Use the useContractCall hook to read the data of the product with the id passed in, from the marketplace contract
+  const { data: numOfProduct }: any = useNumOfBoughtProducts([address, id], true);
   // Use the useContractSend hook to purchase the product with the id passed in, via the marketplace contract
   const { writeAsync: purchase } = useContractSend("buyProduct", [Number(id)]);
 
@@ -71,8 +75,9 @@ const Product = ({profile, id, setError, setLoading, clear }: any) => {
       price: Number(rawProduct[5]),
       sold: rawProduct[6].toString(),
       supply: Number(rawProduct[7]),
+      numberOfProduct: Number(numOfProduct),
     });
-  }, [rawProduct]);
+  }, [rawProduct, numOfProduct]);
 
   // Call the getFormatProduct function when the rawProduct state changes
   useEffect(() => {
@@ -119,28 +124,31 @@ const Product = ({profile, id, setError, setLoading, clear }: any) => {
     if(product && product.supply < 1) {
       setError("Product out of stock")
     } else {
-      setLoading("Approving ...");
-      clear();
+      if(product && product.owner === address) {
+        setError("You can't buy your own product");
+      } else {
+        setLoading("Approving ...");
+        clear();
 
-      try {
-        // If the user is not connected, trigger the wallet connect modal
-        if (!address && openConnectModal) {
-          openConnectModal();
-          return;
+        try {
+          if (!address && openConnectModal) {
+            openConnectModal();
+            return;
+          }
+          // If the user is connected, call the handlePurchase function and display a notification
+          await toast.promise(handlePurchase(), {
+            pending: "Purchasing product...",
+            success: "Product purchased successfully",
+            error: "Failed to purchase product",
+          });
+          // If there is an error, display the error message
+        } catch (e: any) {
+          console.log({ e });
+          setError(e?.reason || e?.message || "Something went wrong. Try again.");
+          // Once the purchase is complete, clear the loading state
+        } finally {
+          setLoading(null);
         }
-        // If the user is connected, call the handlePurchase function and display a notification
-        await toast.promise(handlePurchase(), {
-          pending: "Purchasing product...",
-          success: "Product purchased successfully",
-          error: "Failed to purchase product",
-        });
-        // If there is an error, display the error message
-      } catch (e: any) {
-        console.log({ e });
-        setError(e?.reason || e?.message || "Something went wrong. Try again.");
-        // Once the purchase is complete, clear the loading state
-      } finally {
-        setLoading(null);
       }
     }
   };
@@ -150,28 +158,32 @@ const Product = ({profile, id, setError, setLoading, clear }: any) => {
     if(product && product.supply < 1) {
       setError("Product out of stock")
     } else {
-      setLoading("Approving ...");
-      clear();
+      if(product && product.owner === address) {
+        setError("You can't buy your own product");
+      } else {
+        setLoading("Approving ...");
+        clear();
 
-      try {
-        // If the user is not connected, trigger the wallet connect modal
-        if (!address && openConnectModal) {
-          openConnectModal();
-          return;
+        try {
+          // If the user is not connected, trigger the wallet connect modal
+          if (!address && openConnectModal) {
+            openConnectModal();
+            return;
+          }
+          // If the user is connected, call the handlePurchaseAll() function and display a notification
+          await toast.promise(handlePurchaseAll(), {
+            pending: "Purchasing product...",
+            success: "Product purchased successfully",
+            error: "Failed to purchase product",
+          });
+          // If there is an error, display the error message
+        } catch (e: any) {
+          console.log({ e });
+          setError(e?.reason || e?.message || "Something went wrong. Try again.");
+          // Once the purchase is complete, clear the loading state
+        } finally {
+          setLoading(null);
         }
-        // If the user is connected, call the handlePurchaseAll() function and display a notification
-        await toast.promise(handlePurchaseAll(), {
-          pending: "Purchasing product...",
-          success: "Product purchased successfully",
-          error: "Failed to purchase product",
-        });
-        // If there is an error, display the error message
-      } catch (e: any) {
-        console.log({ e });
-        setError(e?.reason || e?.message || "Something went wrong. Try again.");
-        // Once the purchase is complete, clear the loading state
-      } finally {
-        setLoading(null);
       }
     }
   };
@@ -194,14 +206,24 @@ const Product = ({profile, id, setError, setLoading, clear }: any) => {
     <div className={"shadow-lg relative rounded-b-lg"}>
       <p className="group">
         <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-white xl:aspect-w-7 xl:aspect-h-8 ">
-          {/* Show the number of products sold */}
-          <span
-            className={
-              "absolute z-10 right-0 mt-4 bg-amber-400 text-black p-1 rounded-l-lg px-4"
-            }
-          >
-            {product.sold} sold
-          </span>
+          {/* Show the number of products sold or purchased */}
+          {profile && !uploaded ? (
+            <span
+              className={
+                "absolute z-10 right-0 mt-4 bg-amber-400 text-black p-1 rounded-l-lg px-4"
+              }
+            >
+               {product.numberOfProduct} purchased
+            </span>
+          ):(
+            <span
+              className={
+                "absolute z-10 right-0 mt-4 bg-amber-400 text-black p-1 rounded-l-lg px-4"
+              }
+            >
+              {product.sold} sold
+            </span>
+          )}
           {/* Show the product image */}
           <img
             src={product.image}

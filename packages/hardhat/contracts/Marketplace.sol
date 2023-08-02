@@ -71,6 +71,9 @@ contract Marketplace {
     // Store all the items bought buy a user
     mapping(address => mapping(uint256 => Product)) public userProducts;
 
+    // Store the number of a particular product a user has purchased
+    mapping(address => mapping(uint256 => uint256)) public numOfProductsBought;
+
     // Writes a new product to the marketplace
     function writeProduct(
         string memory _name,
@@ -133,10 +136,14 @@ contract Marketplace {
             // If transfer fails, throw an error message
             "Transfer failed."
         );
-        // Increases the number of times the product has been sold
-        products[_index].sold++;
-        products[_index].supply--;
+        // Increment the number of sold by 1
+        products[_index].sold ++;
+        // Reduce the number of supply by 1
+        products[_index].supply --;
+        // Adds the product to the users products mapping
         userProducts[msg.sender][_index] = products[_index];
+        // Increment the numOfProductsBought by 1
+        numOfProductsBought[msg.sender][_index] ++;
     }
 
     // Buy all available product
@@ -157,9 +164,17 @@ contract Marketplace {
             "Transfer failed."
         );
 
-        products[_index].sold = products[_index].supply;
-        products[_index].supply -= products[_index].supply;
+        // Store the current supply available in a local variable
+        uint256 _supply = products[_index].supply;
+
+        // Increment the number of sold to the total number of supply
+        products[_index].sold += _supply;
+        // Reduce the number of supply left to 0
+        products[_index].supply -= _supply;
+        // Adds the product to the users products mapping
         userProducts[msg.sender][_index] = products[_index];
+        // Increment the numOfProductsBought by the available supply left
+        numOfProductsBought[msg.sender][_index] += _supply;
     }
 
     // Returns the number of products in the marketplace

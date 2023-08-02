@@ -46,6 +46,9 @@ const AddProductModal = () => {
     productLocation &&
     productDescription &&
     productSupply;
+  
+  // Check if all the input fields are empty strings
+  const isEmpty = productName.trim() == "" || productPrice == 0 || productImage.trim() == "" || productLocation.trim() == "" || productDescription.trim() == "" || productSupply == 0;
 
   // Clear the input fields after the product is added to the marketplace
   const clearForm = () => {
@@ -59,15 +62,15 @@ const AddProductModal = () => {
 
   // Convert the product price to wei
   const productPriceInWei = ethers.utils.parseEther(
-    debouncedProductPrice.toString()
+    `${debouncedProductPrice.toString() || 0}`
   );
 
     // Use the useContractSend hook to use our writeProduct function on the marketplace contract and add a product to the marketplace
     const { writeAsync: createProduct } = useContractSend("writeProduct", [
-      debouncedProductName,
-      debouncedProductImage,
-      debouncedProductDescription,
-      debouncedProductLocation,
+      debouncedProductName.trim(),
+      debouncedProductImage.trim(),
+      debouncedProductDescription.trim(),
+      debouncedProductLocation.trim(),
       productPriceInWei,
       productSupply,
     ]);
@@ -78,7 +81,23 @@ const AddProductModal = () => {
         throw "Failed to create product";
       }
       setLoading("Creating...");
-      if (!isComplete) throw new Error("Please fill all fields");
+      if (!isComplete || isEmpty) throw new Error("Please fill all fields");
+      console.log([
+        debouncedProductName.trim(),
+        debouncedProductImage.trim(),
+        debouncedProductDescription.trim(),
+        debouncedProductLocation.trim(),
+        productPriceInWei,
+        productSupply,
+      ])
+      console.log([
+        productName,
+        productImage,
+        productDescription.trim(),
+        productLocation,
+        productPriceInWei,
+        productSupply,
+      ])
       // Create the product by calling the writeProduct function on the marketplace contract
       const purchaseTx = await createProduct();
       setLoading("Waiting for confirmation...");
@@ -113,6 +132,7 @@ const AddProductModal = () => {
   const { address, isConnected } = useAccount();
   const { data: cusdBalance } = useBalance({
     address,
+    watch: true,
     token: erc20Instance.address as `0x${string}`,
   });
 
