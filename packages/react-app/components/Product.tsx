@@ -2,7 +2,7 @@
 // This component displays and enables the purchase of a product
 
 // Importing the dependencies
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 // Import ethers to format the price of the product correctly
 import { ethers } from "ethers";
@@ -192,13 +192,16 @@ const Product = ({profile, id, setError, setLoading, clear, uploaded }: any) => 
   if (!product) return null;
 
   // Format the price of the product from wei to cUSD otherwise the price will be way too high
-  const productPriceFromWei = ethers.utils.formatEther(
-    product.price.toString()
+  const productPriceFromWei = useMemo(
+    () => ethers.utils.formatEther(product.price.toString()),
+    [product.price]
   );
 
   // Format the price of all the suply of a  product from wei to cUSD otherwise the price will be way too high
-  const allProductPriceFromWei = ethers.utils.formatEther(
-    (product.price * product.supply).toString()
+  const allProductPriceFromWei = useMemo(
+    () =>
+      ethers.utils.formatEther((product.price * product.supply).toString()),
+    [product.price, product.supply]
   );
 
   // Return the JSX for the product component

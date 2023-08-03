@@ -138,12 +138,13 @@ const AddProductModal = () => {
 
   // If the user is connected and has a balance, display the balance
   useEffect(() => {
-    if (isConnected && cusdBalance) {
-      setDisplayBalance(true);
-      return;
-    }
+  if (isConnected && cusdBalance) {
+    setDisplayBalance(true);
+  } else {
     setDisplayBalance(false);
-  }, [cusdBalance, isConnected]);
+  }
+ }, [cusdBalance, isConnected]);
+
 
   // Define the JSX that will be rendered
   return (
